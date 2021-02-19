@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
-
 )
 
 // client 客户端实例
@@ -26,30 +25,30 @@ type client struct {
 // ================ 客户端回调方法集 ===============
 
 // OnMessage 当收到消息时触发
-func (c *client) OnMessage(f HandleFunc){
-	c.haveRegisterHandleMessage=true
+func (c *client) OnMessage(f HandleFunc) {
+	c.haveRegisterHandleMessage = true
 	go func() {
-		for ctx:=range c.handleMessageChan {
+		for ctx := range c.handleMessageChan {
 			f(ctx)
 		}
 	}()
 }
 
 // OnConnect 建立连接触发的回调
-func (c *client) OnConnect(f HandleFunc){
+func (c *client) OnConnect(f HandleFunc) {
 	f(&contextRecv{
 		uid:      c.UID,
 		remoteIP: c.conn.conn.RemoteAddr().String(),
 		conn:     c.conn,
-		body:     nil,	// 刚连接,没有消息,自然为空
+		body:     nil, // 刚连接,没有消息,自然为空
 	})
 }
 
 // OnClose 连接断开触发的回调
-func (c *client) OnClose(f HandleFunc){
-	c.haveRegisterClose=true
+func (c *client) OnClose(f HandleFunc) {
+	c.haveRegisterClose = true
 	go func() {
-		for ctx:=range c.closeChan{
+		for ctx := range c.closeChan {
 			f(ctx)
 		}
 	}()
@@ -58,12 +57,12 @@ func (c *client) OnClose(f HandleFunc){
 // ==================== 客户端回调方法集结束 ==========================
 
 // Send 实现客户端发送消息给服务端的方法
-func (c *client) Send(msg StandardMessage)  {
-	_,_=c.conn.Send(msg)
+func (c *client) Send(msg StandardMessage) {
+	_, _ = c.conn.Send(msg)
 }
 
 // listen 客户端消息监听
-func (c *client) listen(){
+func (c *client) listen() {
 	reader := bufio.NewReader(c.conn.conn)
 	for {
 		// 前4个字节表示数据长度
@@ -97,24 +96,24 @@ func (c *client) listen(){
 			continue
 		}
 		// 管道分发,事件处理
-		c.handleMessageChan<- &contextRecv{
+		c.handleMessageChan <- &contextRecv{
 			uid:      c.UID,
 			remoteIP: c.conn.conn.RemoteAddr().String(),
 			conn:     c.conn,
-			body:    data[4:],
+			body:     data[4:],
 		}
 	}
 }
 
 // Close 优雅退出,该方法只允许被调用一回
-func (c *client) Close(){
+func (c *client) Close() {
 	// 关闭连接
 	defer c.conn.Close()
 	defer close(c.closeChan)
 	defer close(c.handleMessageChan)
 	// 事件通知
 	if c.haveRegisterClose {
-		c.closeChan<-&contextRecv{
+		c.closeChan <- &contextRecv{
 			uid:      c.UID,
 			remoteIP: c.conn.conn.RemoteAddr().String(),
 			conn:     c.conn,
@@ -122,5 +121,3 @@ func (c *client) Close(){
 		}
 	}
 }
-
-

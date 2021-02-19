@@ -28,9 +28,11 @@ type ServerHandle interface {
 	// 广播消息
 	Broadcast(msg StandardMessage)
 	// 广播除了自己的其它用户
-	BroadcastOther(uid string,msg StandardMessage)
+	BroadcastOther(uid string, msg StandardMessage)
 	// 发送消息
-	Send(uid string,msg StandardMessage)
+	Send(uid string, msg StandardMessage)
+	// 关闭一个连接
+	CloseByUID(uid string)
 }
 
 // ClientHandle 客户端接口
@@ -38,7 +40,6 @@ type ClientHandle interface {
 	Handle
 	Send(msg StandardMessage)
 }
-
 
 // Context 标准上下文信息
 type Context interface {
@@ -67,40 +68,40 @@ type contextRecv struct {
 }
 
 // String 获取消息字符串
-func (c *contextRecv) String() string{
+func (c *contextRecv) String() string {
 	return string(c.body)
 }
 
 // Byte 获取消息
-func (c *contextRecv) Byte()  []byte{
+func (c *contextRecv) Byte() []byte {
 	return c.body
 }
 
 // RemoteIP 获取远程客户端信息
-func (c *contextRecv) RemoteIP() string{
+func (c *contextRecv) RemoteIP() string {
 	return c.remoteIP
 }
 
 // GetConnUID 获取该连接唯一的 uid
-func (c *contextRecv) GetConnUID() string{
+func (c *contextRecv) GetConnUID() string {
 	return c.uid
 }
+
 // GetConn 获取连接句柄
-func (c *contextRecv) GetConn() *ConnFD{
+func (c *contextRecv) GetConn() *ConnFD {
 	return c.conn
 }
 
 // Send 发送消息
-func (c *contextRecv) Send(msg StandardMessage) (int,error){
+func (c *contextRecv) Send(msg StandardMessage) (int, error) {
 	return c.conn.Send(msg)
 }
-
 
 // FD 文件描述符抽象,实现了读取方法与发送方法
 type FD interface {
 	Read()
 	// 发送方法
-	Send() (int,error)
+	Send() (int, error)
 }
 
 // ConnFD 连接描述符的具体实现
@@ -109,23 +110,23 @@ type ConnFD struct {
 }
 
 // Send 发送消息
-func (c ConnFD) Send(m StandardMessage) (int,error){
-	body,err:=m.encode()
-	if err!=nil {
-		return 0,err
+func (c ConnFD) Send(m StandardMessage) (int, error) {
+	body, err := m.encode()
+	if err != nil {
+		return 0, err
 	}
 	return c.conn.Write(body)
 }
 
 // Close 关闭文件描述符
-func (c ConnFD) Close(){
-	_=c.conn.Close()
+func (c ConnFD) Close() {
+	_ = c.conn.Close()
 }
 
 // StandardMessage 一条标准消息
 type StandardMessage interface {
 	// 一条标准消息实现编码方法
-	encode() ([]byte,error)
+	encode() ([]byte, error)
 }
 
 // Message 是一条标准消息的实现
@@ -134,9 +135,9 @@ type Message struct {
 }
 
 // encode 消息编码
-func (m *Message) encode() ([]byte,error){
+func (m *Message) encode() ([]byte, error) {
 	// 序列化为 json
-	message,_:=json.Marshal(m)
+	message, _ := json.Marshal(m)
 
 	// 读取该 json 的长度
 	var length = int32(len(message))
@@ -153,9 +154,6 @@ func (m *Message) encode() ([]byte,error){
 	}
 	return pkg.Bytes(), nil
 }
-
-
-
 
 // Config 公共配置
 type Config struct {
