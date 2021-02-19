@@ -4,8 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
-	"github.com/go-basic/uuid"
-	"net"
+
 )
 
 // client 客户端实例

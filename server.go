@@ -131,7 +131,7 @@ func (s *server) OnMessage(f HandleFunc){
 	// 注册事件
 	go func() {
 		for ctx:= range s.handleMessageChan{
-			// 每一条消息启动一个协成,并发处理
+			// 每一条消息启动一个协程,并发处理
 			go func(ctx *contextRecv) {
 				fd :=ctx.GetConn()
 				reader := bufio.NewReader(fd.conn)

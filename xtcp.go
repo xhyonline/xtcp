@@ -34,6 +34,7 @@ func NewServer(c Config) (ServerHandle,error){
 		listener: listener,
 		closeChan:make(chan *contextRecv),
 		connChan:make(chan *contextRecv),
+		handleMessageChan:make(chan *contextRecv),
 	}
 	go s.accept()
 	return s,nil
