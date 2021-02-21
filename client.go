@@ -57,8 +57,8 @@ func (c *client) OnClose(f HandleFunc) {
 // ==================== 客户端回调方法集结束 ==========================
 
 // Send 实现客户端发送消息给服务端的方法
-func (c *client) Send(msg StandardMessage) {
-	_, _ = c.conn.Send(msg)
+func (c *client) Send(msg StandardMessage) (int, error) {
+	return c.conn.Send(msg)
 }
 
 // listen 客户端消息监听
@@ -103,6 +103,11 @@ func (c *client) listen() {
 			body:     data[4:],
 		}
 	}
+}
+
+// Run 启动方法
+func (c *client) Run() {
+	go c.listen()
 }
 
 // Close 优雅退出,该方法只允许被调用一回

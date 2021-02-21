@@ -59,6 +59,11 @@ func (s *server) accept() {
 	}
 }
 
+// Run 启动方法
+func (s *server) Run() {
+	go s.accept()
+}
+
 // CloseByUID 通过 uid 关闭一个连接
 func (s *server) CloseByUID(uid string) {
 	if fd, exists := s.fdsContext.Load(uid); exists {
@@ -94,10 +99,11 @@ func (s *server) BroadcastOther(uid string, msg StandardMessage) {
 }
 
 // Send 发送一条消息
-func (s *server) Send(uid string, msg StandardMessage) {
+func (s *server) Send(uid string, msg StandardMessage) (int, error) {
 	if ctx, ok := s.fdsContext.Load(uid); ok {
-		_, _ = ctx.(*contextRecv).Send(msg)
+		return ctx.(*contextRecv).Send(msg)
 	}
+	return 0, nil
 }
 
 // Close 优雅退出

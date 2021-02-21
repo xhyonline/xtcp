@@ -20,6 +20,8 @@ type Handle interface {
 	OnMessage(handleFunc HandleFunc)
 	// Close 优雅退出
 	Close()
+	// 启动
+	Run()
 }
 
 // ServerHandle 服务端接口
@@ -30,7 +32,7 @@ type ServerHandle interface {
 	// 广播除了自己的其它用户
 	BroadcastOther(uid string, msg StandardMessage)
 	// 发送消息
-	Send(uid string, msg StandardMessage)
+	Send(uid string, msg StandardMessage) (int, error)
 	// 关闭一个连接
 	CloseByUID(uid string)
 }
@@ -38,7 +40,7 @@ type ServerHandle interface {
 // ClientHandle 客户端接口
 type ClientHandle interface {
 	Handle
-	Send(msg StandardMessage)
+	Send(msg StandardMessage) (int, error)
 }
 
 // Context 标准上下文信息
