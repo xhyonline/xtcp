@@ -33,6 +33,8 @@ type ServerHandle interface {
 	BroadcastTextOther(uid string, msg string)
 	// 发送消息
 	SendText(uid string, msg string) error
+	// 发送消息
+	SendByte(uid string, msg []byte) error
 	// 关闭一个连接
 	CloseByUID(uid string)
 }
@@ -40,7 +42,9 @@ type ServerHandle interface {
 // ClientHandle 客户端接口
 type ClientHandle interface {
 	Handle
-	SendText(string) error
+	SendText(msg string) error
+	// 发送消息
+	SendByte(msg []byte) error
 }
 
 // Context 标准上下文信息
@@ -55,6 +59,10 @@ type Context interface {
 	GetConnUID() string
 	// 获取连接句柄
 	GetConn() *FD
+	// 发送文本消息
+	SendText(msg string) error
+	// 发送字节
+	SendByte(msg []byte) error
 }
 
 // contextRecv 上下文接收器
@@ -99,14 +107,30 @@ func (c *contextRecv) SendText(msg string) error {
 	return c.conn.SendText(msg)
 }
 
+// SendByte 发送字节
+func (c *contextRecv) SendByte(msg []byte) error {
+	return c.conn.SendByte(msg)
+}
+
 // FD 连接描述符的具体实现
 type FD struct {
 	conn net.Conn
 }
 
 // SendText 发送消息
-func (c FD) SendText(str string) error {
-	m := &Message{Body: str}
+func (c FD) SendText(msg string) error {
+	m := &Message{Body: msg}
+	body, err := m.encode()
+	if err != nil {
+		return err
+	}
+	_, err = c.conn.Write(body)
+	return err
+}
+
+// SendByte 发送字节
+func (c FD) SendByte(msg []byte) error {
+	m := &Message{Body: string(msg)}
 	body, err := m.encode()
 	if err != nil {
 		return err

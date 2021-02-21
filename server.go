@@ -112,6 +112,14 @@ func (s *server) SendText(uid string, msg string) error {
 	return nil
 }
 
+// SendByte 发送一条消息
+func (s *server) SendByte(uid string, msg []byte) error {
+	if ctx, ok := s.fdsContext.Load(uid); ok {
+		return ctx.(*contextRecv).SendByte(msg)
+	}
+	return nil
+}
+
 // Close 优雅退出
 func (s *server) Close() {
 	if s.isShutdown {

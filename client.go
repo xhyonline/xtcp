@@ -58,8 +58,13 @@ func (c *client) OnClose(f HandleFunc) {
 // ==================== 客户端回调方法集结束 ==========================
 
 // SendText 实现客户端发送消息给服务端的方法
-func (c *client) SendText(str string) error {
-	return c.conn.SendText(str)
+func (c *client) SendText(msg string) error {
+	return c.conn.SendText(msg)
+}
+
+// SendByte 发送一条消息
+func (c *client) SendByte(msg []byte) error {
+	return c.conn.SendByte(msg)
 }
 
 // listen 客户端消息监听
