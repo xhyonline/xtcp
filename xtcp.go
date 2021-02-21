@@ -13,7 +13,7 @@ func NewClient(c Config) ClientHandle {
 	}
 	client := &client{
 		UID:               uuid.New(),
-		conn:              &ConnFD{conn: conn},
+		conn:              &FD{conn: conn},
 		closeChan:         make(chan *contextRecv),
 		handleMessageChan: make(chan *contextRecv),
 	}

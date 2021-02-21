@@ -28,11 +28,11 @@ type Handle interface {
 type ServerHandle interface {
 	Handle
 	// 广播消息
-	Broadcast(msg StandardMessage)
+	BroadcastText(msg string)
 	// 广播除了自己的其它用户
-	BroadcastOther(uid string, msg StandardMessage)
+	BroadcastTextOther(uid string, msg string)
 	// 发送消息
-	Send(uid string, msg StandardMessage) (int, error)
+	SendText(uid string, msg string) error
 	// 关闭一个连接
 	CloseByUID(uid string)
 }
@@ -40,7 +40,7 @@ type ServerHandle interface {
 // ClientHandle 客户端接口
 type ClientHandle interface {
 	Handle
-	Send(msg StandardMessage) (int, error)
+	SendText(string) error
 }
 
 // Context 标准上下文信息
@@ -54,7 +54,7 @@ type Context interface {
 	// 获取该连接的 uid
 	GetConnUID() string
 	// 获取连接句柄
-	GetConn() *ConnFD
+	GetConn() *FD
 }
 
 // contextRecv 上下文接收器
@@ -64,7 +64,7 @@ type contextRecv struct {
 	// IP
 	remoteIP string
 	// 句柄
-	conn *ConnFD
+	conn *FD
 	// 消息内容
 	body string
 }
@@ -90,38 +90,33 @@ func (c *contextRecv) GetConnUID() string {
 }
 
 // GetConn 获取连接句柄
-func (c *contextRecv) GetConn() *ConnFD {
+func (c *contextRecv) GetConn() *FD {
 	return c.conn
 }
 
-// Send 发送消息
-func (c *contextRecv) Send(msg StandardMessage) (int, error) {
-	return c.conn.Send(msg)
+// SendText 发送消息
+func (c *contextRecv) SendText(msg string) error {
+	return c.conn.SendText(msg)
 }
 
-// FD 文件描述符抽象,实现了读取方法与发送方法
-type FD interface {
-	Read()
-	// 发送方法
-	Send() (int, error)
-}
-
-// ConnFD 连接描述符的具体实现
-type ConnFD struct {
+// FD 连接描述符的具体实现
+type FD struct {
 	conn net.Conn
 }
 
-// Send 发送消息
-func (c ConnFD) Send(m StandardMessage) (int, error) {
+// SendText 发送消息
+func (c FD) SendText(str string) error {
+	m := &Message{Body: str}
 	body, err := m.encode()
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return c.conn.Write(body)
+	_, err = c.conn.Write(body)
+	return err
 }
 
 // Close 关闭文件描述符
-func (c ConnFD) Close() {
+func (c FD) Close() {
 	_ = c.conn.Close()
 }
 

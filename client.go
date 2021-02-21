@@ -12,7 +12,7 @@ type client struct {
 	// 服务端连接的唯一 ID
 	UID string
 	// 连接句柄
-	conn *ConnFD
+	conn *FD
 	// 是否注册了关闭方法
 	haveRegisterClose bool
 	// 是否注册了消息处理方法
@@ -57,9 +57,9 @@ func (c *client) OnClose(f HandleFunc) {
 
 // ==================== 客户端回调方法集结束 ==========================
 
-// Send 实现客户端发送消息给服务端的方法
-func (c *client) Send(msg StandardMessage) (int, error) {
-	return c.conn.Send(msg)
+// SendText 实现客户端发送消息给服务端的方法
+func (c *client) SendText(str string) error {
+	return c.conn.SendText(str)
 }
 
 // listen 客户端消息监听

@@ -48,7 +48,7 @@ func (s *server) accept() {
 		ctx := &contextRecv{
 			uid:      uid,
 			remoteIP: conn.RemoteAddr().String(),
-			conn:     &ConnFD{conn: conn},
+			conn:     &FD{conn: conn},
 		}
 		// 将连接维护到总集合中
 		s.fdsContext.Store(uid, ctx)
@@ -85,31 +85,31 @@ func (s *server) CloseByUID(uid string) {
 	}
 }
 
-// Broadcast 广播
-func (s *server) Broadcast(msg StandardMessage) {
+// BroadcastText 广播
+func (s *server) BroadcastText(msg string) {
 	s.fdsContext.Range(func(key, ctx interface{}) bool {
-		_, _ = ctx.(*contextRecv).Send(msg)
+		_ = ctx.(*contextRecv).SendText(msg)
 		return true
 	})
 }
 
-// BroadcastOther 广播给其它人,除了自己
-func (s *server) BroadcastOther(uid string, msg StandardMessage) {
+// BroadcastTextOther 广播给其它人,除了自己
+func (s *server) BroadcastTextOther(uid string, msg string) {
 	s.fdsContext.Range(func(key, ctx interface{}) bool {
 		if id := ctx.(*contextRecv).uid; uid == id {
 			return true
 		}
-		_, _ = ctx.(*contextRecv).Send(msg)
+		_ = ctx.(*contextRecv).SendText(msg)
 		return true
 	})
 }
 
-// Send 发送一条消息
-func (s *server) Send(uid string, msg StandardMessage) (int, error) {
+// SendText 发送一条消息
+func (s *server) SendText(uid string, msg string) error {
 	if ctx, ok := s.fdsContext.Load(uid); ok {
-		return ctx.(*contextRecv).Send(msg)
+		return ctx.(*contextRecv).SendText(msg)
 	}
-	return 0, nil
+	return nil
 }
 
 // Close 优雅退出
