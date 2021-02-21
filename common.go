@@ -31,6 +31,10 @@ type ServerHandle interface {
 	BroadcastText(msg string)
 	// 广播除了自己的其它用户
 	BroadcastTextOther(uid string, msg string)
+	// 广播消息
+	BroadcastByte(msg string)
+	// 广播除了自己的其它用户
+	BroadcastByteOther(uid string, msg string)
 	// 发送消息
 	SendText(uid string, msg string) error
 	// 发送消息

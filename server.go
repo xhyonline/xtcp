@@ -104,6 +104,25 @@ func (s *server) BroadcastTextOther(uid string, msg string) {
 	})
 }
 
+// BroadcastByte 广播
+func (s *server) BroadcastByte(msg []byte) {
+	s.fdsContext.Range(func(key, ctx interface{}) bool {
+		_ = ctx.(*contextRecv).SendByte(msg)
+		return true
+	})
+}
+
+// BroadcastByteOther 广播给其它人,除了自己
+func (s *server) BroadcastByteOther(uid string, msg []byte) {
+	s.fdsContext.Range(func(key, ctx interface{}) bool {
+		if id := ctx.(*contextRecv).uid; uid == id {
+			return true
+		}
+		_ = ctx.(*contextRecv).SendByte(msg)
+		return true
+	})
+}
+
 // SendText 发送一条消息
 func (s *server) SendText(uid string, msg string) error {
 	if ctx, ok := s.fdsContext.Load(uid); ok {
