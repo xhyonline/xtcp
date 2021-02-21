@@ -27,12 +27,17 @@ type server struct {
 	closeChan chan *contextRecv
 	// 处理消息管道
 	handleMessageChan chan *contextRecv
+	// 是否关闭
+	isShutdown bool
 }
 
 // accept 接受连接
 func (s *server) accept() {
 	for {
 		conn, err := s.listener.Accept()
+		if err != nil && s.isShutdown {
+			break
+		}
 		if err != nil {
 			panic(err)
 		}
@@ -108,6 +113,10 @@ func (s *server) Send(uid string, msg StandardMessage) (int, error) {
 
 // Close 优雅退出
 func (s *server) Close() {
+	if s.isShutdown {
+		return
+	}
+	s.isShutdown = true
 	_ = s.listener.Close()
 	defer close(s.closeChan)
 	defer close(s.handleMessageChan)
