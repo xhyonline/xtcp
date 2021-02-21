@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"github.com/go-basic/uuid"
 	"net"
 	"sync"
@@ -176,8 +177,10 @@ func (s *server) OnMessage(f HandleFunc) {
 					if err != nil {
 						continue
 					}
+					m := new(Message)
+					_ = json.Unmarshal(data[4:], m)
 					// 将消息内容赋给上下文
-					ctx.body = data[4:]
+					ctx.body = m.Body
 					f(ctx)
 				}
 			}(ctx)

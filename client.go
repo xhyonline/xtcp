@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 )
 
 // client 客户端实例
@@ -40,7 +41,7 @@ func (c *client) OnConnect(f HandleFunc) {
 		uid:      c.UID,
 		remoteIP: c.conn.conn.RemoteAddr().String(),
 		conn:     c.conn,
-		body:     nil, // 刚连接,没有消息,自然为空
+		body:     "", // 刚连接,没有消息,自然为空
 	})
 }
 
@@ -95,12 +96,14 @@ func (c *client) listen() {
 		if !c.haveRegisterHandleMessage {
 			continue
 		}
+		m := new(Message)
+		_ = json.Unmarshal(data[4:], m)
 		// 管道分发,事件处理
 		c.handleMessageChan <- &contextRecv{
 			uid:      c.UID,
 			remoteIP: c.conn.conn.RemoteAddr().String(),
 			conn:     c.conn,
-			body:     data[4:],
+			body:     m.Body,
 		}
 	}
 }
@@ -122,7 +125,7 @@ func (c *client) Close() {
 			uid:      c.UID,
 			remoteIP: c.conn.conn.RemoteAddr().String(),
 			conn:     c.conn,
-			body:     nil,
+			body:     "",
 		}
 	}
 }

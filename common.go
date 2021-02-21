@@ -66,17 +66,17 @@ type contextRecv struct {
 	// 句柄
 	conn *ConnFD
 	// 消息内容
-	body []byte
+	body string
 }
 
 // String 获取消息字符串
 func (c *contextRecv) String() string {
-	return string(c.body)
+	return c.body
 }
 
 // Byte 获取消息
 func (c *contextRecv) Byte() []byte {
-	return c.body
+	return []byte(c.body)
 }
 
 // RemoteIP 获取远程客户端信息
