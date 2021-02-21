@@ -24,27 +24,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-    
-	// 当客户端连接时的回调方法
+	// 当客户端连接时
 	server.OnConnect(func(ctx xtcp.Context) {
 		fmt.Printf("有一个客户端连接进来了,他的 IP 为 %s  他的 uid 为 %s\n", ctx.RemoteIP(), ctx.GetConnUID())
-        
-		// 给该客户端发送欢迎语
-		_, err := ctx.GetConn().Send(&xtcp.Message{Body: "您好新来的客户端" + ctx.GetConnUID()})
+		// 发送欢迎语
+		err := ctx.GetConn().SendText("您好新来的客户端" + ctx.GetConnUID())
 		if err != nil {
 			panic(err)
 		}
-		
-		// 当然你也可以这么发送
-		//_, err = server.Send(ctx.GetConnUID(), &xtcp.Message{Body: "您好新来的客户端" + ctx.GetConnUID()})
-		//if err != nil {
-		//	panic(err)
-		//}
-		
-		
-		// 5 秒后关闭这个连接
-		time.Sleep(time.Second * 5)
-		server.CloseByUID(ctx.GetConnUID())
 	})
 
 	// 当收到客户端消息时
@@ -62,9 +49,12 @@ func main() {
 	// 启动服务端,它是一个异步操作,请自行添加阻塞
 	server.Run()
 	//
+	time.Sleep(time.Second * 15)
+	//
+	server.BroadcastText("这是一条广播消息")
+	//
 	select {}
 }
-
 ```
 
 **客户端**
@@ -86,12 +76,11 @@ func main() {
 
 	client.OnConnect(func(ctx xtcp.Context) {
 		fmt.Println("客户端建立了连接")
-		_, err := ctx.GetConn().Send(&xtcp.Message{Body: "你好我是客户端的消息"})
+		err := ctx.GetConn().SendText("你好我是客户端的消息")
 		if err != nil {
 			panic(err)
 		}
 	})
-
 	client.OnMessage(func(ctx xtcp.Context) {
 		fmt.Println("客户端收到了一条消息", ctx.String())
 	})
@@ -99,9 +88,12 @@ func main() {
 	client.OnClose(func(ctx xtcp.Context) {
 		fmt.Println("客户端断开了连接")
 	})
+
 	client.Run()
+
 	select {}
 }
+
 ```
 
 
