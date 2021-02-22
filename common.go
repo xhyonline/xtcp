@@ -18,7 +18,7 @@ type Handle interface {
 	OnClose(handleFunc HandleFunc)
 	// 当有消息时触发的方法
 	OnMessage(handleFunc HandleFunc)
-	// Close 优雅退出
+	// close 优雅退出
 	Close()
 	// 启动
 	Run()
@@ -143,8 +143,8 @@ func (c FD) SendByte(msg []byte) error {
 	return err
 }
 
-// Close 关闭文件描述符
-func (c FD) Close() {
+// close 关闭文件描述符
+func (c FD) close() {
 	_ = c.conn.Close()
 }
 

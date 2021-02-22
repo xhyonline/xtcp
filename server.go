@@ -77,7 +77,7 @@ func (s *server) CloseByUID(uid string) {
 		s.fdsContext.Delete(uid)
 		ctx := fd.(*contextRecv)
 		// 关闭连接
-		ctx.conn.Close()
+		ctx.conn.close()
 		// 推送关闭事件
 		if s.haveRegisterClose {
 			s.closeChan <- ctx
@@ -139,7 +139,7 @@ func (s *server) SendByte(uid string, msg []byte) error {
 	return nil
 }
 
-// Close 优雅退出
+// close 优雅退出
 func (s *server) Close() {
 	if s.isShutdown {
 		return

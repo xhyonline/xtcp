@@ -118,10 +118,10 @@ func (c *client) Run() {
 	go c.listen()
 }
 
-// Close 优雅退出,该方法只允许被调用一回
+// close 优雅退出,该方法只允许被调用一回
 func (c *client) Close() {
 	// 关闭连接
-	defer c.conn.Close()
+	defer c.conn.close()
 	defer close(c.closeChan)
 	defer close(c.handleMessageChan)
 	// 事件通知
