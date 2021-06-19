@@ -4,6 +4,9 @@ xtcp 是一款 Golang 轻量级 TCP 框架,以回调事件形式处理消息。�
 
 使用方式说明:
 
+安装: `go get github.com/xhyonline/xtcp`
+
+
 **服务端**
 
 ```go
