@@ -162,7 +162,7 @@ func (s *server) OnConnect(f HandleFunc) {
 	s.haveRegisterConn = true
 	go func() {
 		for ctx := range s.connChan {
-			f(ctx)
+			go f(ctx)
 		}
 	}()
 }
@@ -220,7 +220,7 @@ func (s *server) OnClose(f HandleFunc) {
 	s.haveRegisterClose = true
 	go func() {
 		for ctx := range s.closeChan {
-			f(ctx)
+			go f(ctx)
 		}
 	}()
 }

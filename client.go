@@ -30,14 +30,14 @@ func (c *client) OnMessage(f HandleFunc) {
 	c.haveRegisterHandleMessage = true
 	go func() {
 		for ctx := range c.handleMessageChan {
-			f(ctx)
+			go f(ctx)
 		}
 	}()
 }
 
 // OnConnect 建立连接触发的回调
 func (c *client) OnConnect(f HandleFunc) {
-	f(&contextRecv{
+	go f(&contextRecv{
 		uid:      c.UID,
 		remoteIP: c.conn.conn.RemoteAddr().String(),
 		conn:     c.conn,
@@ -50,7 +50,7 @@ func (c *client) OnClose(f HandleFunc) {
 	c.haveRegisterClose = true
 	go func() {
 		for ctx := range c.closeChan {
-			f(ctx)
+			go f(ctx)
 		}
 	}()
 }
