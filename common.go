@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"net"
+	"time"
 )
 
 type HandleFunc func(ctx Context)
@@ -18,10 +19,10 @@ type Handle interface {
 	OnClose(handleFunc HandleFunc)
 	// 当有消息时触发的方法
 	OnMessage(handleFunc HandleFunc)
-	// close 优雅退出
-	Close()
 	// 启动
 	Run()
+	// 优雅退出
+	GracefulClose()
 }
 
 // ServerHandle 服务端接口
@@ -143,7 +144,7 @@ func (c FD) SendByte(msg []byte) error {
 	return err
 }
 
-// close 关闭文件描述符
+// GracefulClose 关闭文件描述符
 func (c FD) close() {
 	_ = c.conn.Close()
 }
@@ -184,4 +185,5 @@ func (m *Message) encode() ([]byte, error) {
 type Config struct {
 	Host string
 	Port string
+	HeartBeat time.Duration
 }

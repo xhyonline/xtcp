@@ -6,12 +6,18 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"github.com/go-basic/uuid"
+	"github.com/xhyonline/xutil/xlog"
 	"net"
 	"sync"
+	"time"
 )
+
+var logger=xlog.Get().Debugger()
 
 // server 是一个服务端实例
 type server struct {
+	// 心跳
+	heartBeat time.Duration
 	// 服务端监听句柄
 	listener net.Listener
 	// 服务端文件描述符的上下文集合 key 是 uid 值为 contextRecv
@@ -139,8 +145,8 @@ func (s *server) SendByte(uid string, msg []byte) error {
 	return nil
 }
 
-// close 优雅退出
-func (s *server) Close() {
+// GracefulClose 优雅退出
+func (s *server) GracefulClose() {
 	if s.isShutdown {
 		return
 	}
@@ -178,6 +184,10 @@ func (s *server) OnMessage(f HandleFunc) {
 				fd := ctx.GetConn()
 				reader := bufio.NewReader(fd.conn)
 				for {
+					err := fd.conn.SetDeadline(time.Now().Add(s.heartBeat))
+					if err != nil {
+						logger.Error(err)
+					}
 					// 前4个字节表示数据长度
 					// 此外 Peek 方法并不会减少 reader 中的实际数据量
 					peek, err := reader.Peek(4)
@@ -226,3 +236,4 @@ func (s *server) OnClose(f HandleFunc) {
 }
 
 // ======================== 事件回调方法结束 ===================================
+

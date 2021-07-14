@@ -75,7 +75,7 @@ func (c *client) listen() {
 		// 此外 Peek 方法并不会减少 reader 中的实际数据量
 		peek, err := reader.Peek(4)
 		if err != nil {
-			c.Close()
+			c.GracefulClose()
 			break
 		}
 		buffer := bytes.NewBuffer(peek)
@@ -118,8 +118,8 @@ func (c *client) Run() {
 	go c.listen()
 }
 
-// close 优雅退出,该方法只允许被调用一回
-func (c *client) Close() {
+// GracefulClose 优雅退出,该方法只允许被调用一回
+func (c *client) GracefulClose() {
 	// 关闭连接
 	defer c.conn.close()
 	defer close(c.closeChan)
